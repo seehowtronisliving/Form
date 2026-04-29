@@ -1,0 +1,12 @@
+{
+  "name": "Minimal Coach",
+  "short_name": "Coach",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#F4F1EA",
+  "theme_color": "#F4F1EA",
+  "icons": [
+    { "src": "https://via.placeholder.com/192/E2725B/ffffff?text=C", "sizes": "192x192", "type": "image/png" },
+    { "src": "https://via.placeholder.com/512/E2725B/ffffff?text=C", "sizes": "512x512", "type": "image/png" }
+  ]
+}
