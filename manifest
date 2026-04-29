@@ -1,1 +1,15 @@
-
+{
+  "name": "Form | Strategic Strength",
+  "short_name": "Strategic",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#F9F7F2",
+  "theme_color": "#4A5D4E",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
