@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.json">
+    <title>Coach</title>
+    <style>
+        :root { --bg: #F4F1EA; --clay: #E2725B; --text: #1A1A1A; --glass: rgba(255, 255, 255, 0.4); }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        header { padding: 50px 20px 10px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; }
+        .card { width: 85%; max-width: 380px; background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 35px; padding: 40px 20px; text-align: center; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .ex-name { font-size: 24px; font-weight: 300; margin-bottom: 30px; }
+        .stepper { display: flex; justify-content: space-around; margin-bottom: 40px; }
+        .val { font-size: 48px; font-weight: 200; }
+        .unit { font-size: 10px; opacity: 0.4; text-transform: uppercase; margin-top: -5px; }
+        .btn-s { background: none; border: 1px solid rgba(0,0,0,0.05); width: 40px; height: 40px; border-radius: 50%; font-size: 18px; }
+        .log-circle { width: 140px; height: 140px; background: var(--clay); color: white; border: none; border-radius: 50%; font-size: 16px; font-weight: 500; cursor: pointer; position: relative; }
+        #timer-display { display: none; font-size: 32px; font-weight: 200; color: var(--clay); }
+        nav { position: absolute; bottom: 0; width: 100%; height: 80px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(0,0,0,0.05); }
+        .dot { width: 6px; height: 6px; background: var(--text); border-radius: 50%; opacity: 0.2; }
+        .active { opacity: 1; }
+    </style>
+</head>
+<body>
+    <header id="loc">Gym</header>
+    <div class="card">
+        <div class="ex-name" id="exName">Bench Press</div>
+        <div class="stepper">
+            <div><button class="btn-s" onclick="adj('w', 2.5)">+</button><div class="val" id="weight">95</div><div class="unit">kg</div><button class="btn-s" onclick="adj('w', -2.5)">−</button></div>
+            <div><button class="btn-s" onclick="adj('r', 1)">+</button><div class="val" id="reps">8</div><div class="unit">reps</div><button class="btn-s" onclick="adj('r', -1)">−</button></div>
+        </div>
+        <button class="log-circle" id="mainBtn" onclick="logSet()">LOG</button>
+        <div id="timer-display">1:30</div>
+        <div id="next" style="margin-top:25px; font-size:11px; opacity:0.3; letter-spacing:1px;">SET 1</div>
+    </div>
+    <nav><div class="dot active"></div><div class="dot"></div><div class="dot"></div></nav>
+
+    <script>
+        let apiKey = localStorage.getItem('gemini_key');
+        if (!apiKey) {
+            apiKey = prompt("Enter Gemini API Key:");
+            localStorage.setItem('gemini_key', apiKey);
+        }
+
+        function adj(t, v) {
+            let el = document.getElementById(t === 'w' ? 'weight' : 'reps');
+            el.innerText = parseFloat(el.innerText) + v;
+        }
+
+        async function logSet() {
+            const btn = document.getElementById('mainBtn');
+            const timer = document.getElementById('timer-display');
+            btn.style.display = 'none';
+            timer.style.display = 'block';
+            
+            // AI Call
+            const prompt = `User logged ${document.getElementById('weight').innerText}kg for ${document.getElementById('reps').innerText} reps at RPE 8. 42yo experienced lifter. Based on RPE 8, provide next set weight/reps. JSON format only: {"w": float, "r": int}`;
+            
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await res.json();
+                const cleanJson = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, ""));
+                document.getElementById('next').innerText = `NEXT: ${cleanJson.w}kg x ${cleanJson.r}`;
+            } catch (e) { console.error(e); }
+        }
+
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    </script>
+</body>
+</html>
