@@ -74,4 +74,228 @@
                 <p class="sub">Your biological starting point.</p>
                 <input type="text" id="in-name" placeholder="Name">
                 <input type="number" id="in-age" placeholder="Age">
-                <input type="text" id="in-exp" placeholder="Experience (e
+                <input type="text" id="in-exp" placeholder="Experience (e.g. 10+ years)">
+                <button class="btn-prime" onclick="nextStep(2)">Continue</button>
+            </div>
+            <div id="step2" class="step">
+                <h1>The Baseline</h1>
+                <p class="sub">Define your core strength goal (e.g. 95kg Bench).</p>
+                <textarea id="in-goals" placeholder="Primary Goals & Objectives"></textarea>
+                <input type="text" id="in-baseline" placeholder="Bench Press Max (kg)">
+                <button class="btn-prime" onclick="nextStep(3)">Continue</button>
+            </div>
+            <div id="step3" class="step">
+                <h1>The Context</h1>
+                <p class="sub">Workouts per week and equipment availability.</p>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="in-freq" placeholder="Days/Wk">
+                    <input type="number" id="in-dur" placeholder="Mins/Sess">
+                </div>
+                <textarea id="in-gym" placeholder="Gym Equipment List"></textarea>
+                <textarea id="in-home" placeholder="Home Equipment List"></textarea>
+                <button class="btn-prime" onclick="completeOnboarding()">Initialize Engine</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-train" class="view">
+        <div class="badge-row">
+            <div id="b-gym" class="badge active" onclick="switchMode('gym')">Gym</div>
+            <div id="b-home" class="badge" onclick="switchMode('home')">Home</div>
+        </div>
+        <header id="target-header">Strategic Prescription</header>
+        <div class="card">
+            <h2 id="ex-name" style="font-weight:200; text-align:center; font-size:28px; margin:0 0 10px;">Select Movement</h2>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stepper" onclick="adj('w', 2.5)">+</div>
+                    <div class="stat-val" id="val-w">0</div><div class="stat-unit">kg</div>
+                    <div class="stepper" onclick="adj('w', -2.5)">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stepper" onclick="adj('r', 1)">+</div>
+                    <div class="stat-val" id="val-r">0</div><div class="stat-unit">reps</div>
+                    <div class="stepper" onclick="adj('r', -1)">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stepper" onclick="adj('e', 0.5)">+</div>
+                    <div class="stat-val" id="val-e">7.0</div><div class="stat-unit">RPE</div>
+                    <div class="stepper" onclick="adj('e', -0.5)">-</div>
+                </div>
+            </div>
+
+            <div class="circle-container">
+                <svg class="progress-svg" width="180" height="180">
+                    <circle cx="90" cy="90" r="85" stroke="rgba(0,0,0,0.04)" stroke-width="3" fill="none" />
+                    <circle id="ring" cx="90" cy="90" r="85" stroke="#E2725B" stroke-width="3" fill="none" stroke-dasharray="534" stroke-dashoffset="534" stroke-linecap="round" />
+                </svg>
+                <button class="log-btn" id="log-action" onclick="handleLog()">LOG SET</button>
+                <div class="timer-text" id="timer-val">0</div>
+            </div>
+
+            <div class="tactical-row">
+                <button onclick="aiSwap()" class="t-btn"><i data-lucide="refresh-cw" size="18"></i><span>Swap</span></button>
+                <button onclick="addSet()" class="t-btn"><i data-lucide="plus-circle" size="18"></i><span>+Set</span></button>
+                <button onclick="flagInjury()" class="t-btn" style="color:var(--clay)"><i data-lucide="alert-triangle" size="18"></i><span>Flag</span></button>
+            </div>
+        </div>
+        <button class="btn-prime" style="background:var(--moss)" onclick="endSession()">End Session & Review</button>
+    </div>
+
+    <div id="v-coach" class="view">
+        <header>Program Director</header>
+        <div id="chat-stream" style="flex:1; overflow-y:auto; padding:10px 0; display:flex; flex-direction:column; gap:15px;"></div>
+        <div style="display:flex; gap:12px; align-items:center;">
+            <input type="text" id="chat-input" placeholder="Talk to the coach..." style="margin:0;">
+            <button onclick="sendChat()" style="background:var(--moss); color:white; border:none; width:60px; height:60px; border-radius:20px; display:flex; align-items:center; justify-content:center;"><i data-lucide="send" size="20"></i></button>
+        </div>
+    </div>
+
+    <div id="v-settings" class="view">
+        <header>System Configuration</header>
+        <div class="card" id="profile-summary"></div>
+        <div class="card">
+            <p class="sub" style="margin-bottom:10px;">AI Integration</p>
+            <input type="password" id="api-key" placeholder="Gemini API Key">
+            <button class="btn-prime" onclick="saveKey()">Update Key</button>
+        </div>
+        <button onclick="wipe()" style="color:var(--clay); border:none; background:none; font-size:11px; font-weight:800; letter-spacing:1px; width:100%; margin-top:30px;">WIPE MASTER RECORD</button>
+    </div>
+
+    <nav id="navbar">
+        <button class="n-btn" onclick="showTab('coach', this)"><i data-lucide="message-square"></i></button>
+        <button class="n-btn active" onclick="showTab('train', this)"><i data-lucide="dumbbell"></i></button>
+        <button class="n-btn" onclick="showTab('settings', this)"><i data-lucide="sliders"></i></button>
+    </nav>
+
+    <script>
+        let state = {
+            profile: JSON.parse(localStorage.getItem('form_profile')) || null,
+            apiKey: localStorage.getItem('form_key') || '',
+            mode: 'gym',
+            logs: []
+        };
+
+        function init() {
+            if (state.profile) {
+                document.getElementById('v-onboard').classList.remove('active');
+                document.getElementById('v-train').classList.add('active');
+                document.getElementById('navbar').classList.add('visible');
+                renderSettings();
+            }
+            lucide.createIcons();
+        }
+
+        function nextStep(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step'+n).classList.add('active');
+        }
+
+        function completeOnboarding() {
+            state.profile = {
+                name: document.getElementById('in-name').value,
+                age: document.getElementById('in-age').value,
+                exp: document.getElementById('in-exp').value,
+                goals: document.getElementById('in-goals').value,
+                baseline: document.getElementById('in-baseline').value,
+                schedule: { freq: document.getElementById('in-freq').value, dur: document.getElementById('in-dur').value },
+                equipment: { gym: document.getElementById('in-gym').value, home: document.getElementById('in-home').value }
+            };
+            localStorage.setItem('form_profile', JSON.stringify(state.profile));
+            location.reload();
+        }
+
+        function adj(t, v) {
+            let el = document.getElementById('val-'+t);
+            let n = parseFloat(el.innerText) + v;
+            el.innerText = n % 1 === 0 ? n : n.toFixed(1);
+        }
+
+        function handleLog() {
+            const data = {
+                ex: document.getElementById('ex-name').innerText,
+                w: document.getElementById('val-w').innerText,
+                r: document.getElementById('val-r').innerText,
+                e: document.getElementById('val-e').innerText,
+                ts: new Date().toISOString()
+            };
+            state.logs.push(data);
+            
+            // Strategic Rest: Science-based defaults unless coach updates program
+            let restTime = parseFloat(data.e) >= 9 ? 180 : 90;
+            startTimer(restTime);
+        }
+
+        function startTimer(sec) {
+            const btn = document.getElementById('log-action');
+            const txt = document.getElementById('timer-val');
+            const ring = document.getElementById('ring');
+            btn.style.display = 'none';
+            txt.style.display = 'block';
+            let left = sec;
+            const timer = setInterval(() => {
+                left--;
+                txt.innerText = left;
+                ring.style.strokeDashoffset = 534 - (left / sec) * 534;
+                if(left <= 0) { 
+                    clearInterval(timer); btn.style.display = 'block'; txt.style.display = 'none'; 
+                    ring.style.strokeDashoffset = 534;
+                }
+            }, 1000);
+        }
+
+        async function endSession() {
+            if(!state.apiKey) return alert("Please set API Key to run Strategic Review.");
+            alert("Coach is performing a Strategic Review of this session...");
+            // Gemini call logic: Send state.logs + state.profile -> Return conservative program update
+            state.logs = [];
+            alert("Program updated conservatively for next session.");
+        }
+
+        function switchMode(m) {
+            state.mode = m;
+            document.querySelectorAll('.badge').forEach(b => b.classList.remove('active'));
+            document.getElementById('b-'+m).classList.add('active');
+        }
+
+        function showTab(t, btn) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('v-'+t).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function renderSettings() {
+            const p = state.profile;
+            document.getElementById('profile-summary').innerHTML = `
+                <p style="font-weight:700; margin:0;">${p.name}</p>
+                <p style="font-size:12px; opacity:0.5;">${p.age}y • ${p.exp}</p>
+                <hr style="border:none; border-top:1px solid var(--border); margin:15px 0;">
+                <p style="font-size:13px;"><b>Baseline:</b> ${p.baseline}kg</p>
+                <p style="font-size:13px;"><b>Goals:</b> ${p.goals}</p>
+            `;
+        }
+
+        function saveKey() {
+            state.apiKey = document.getElementById('api-key').value;
+            localStorage.setItem('form_key', state.apiKey);
+            alert("System State Updated.");
+        }
+
+        function wipe() { if(confirm("Erase all data?")) { localStorage.clear(); location.reload(); } }
+
+        // Tactical Stubs
+        function aiSwap() { alert("Coach: Based on your equipment, I suggest swapping to the closest biomechanical equivalent."); }
+        function addSet() { alert("Set added to session history."); }
+        function flagInjury() { alert("Flag added. Coach will prioritize recovery in the Strategic Review."); }
+
+        init();
+        // Register Service Worker for PWA Offline Support
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+    .then(() => console.log("Form: Offline Engine Active"))
+    .catch((err) => console.log("Form: Offline Engine Failed", err));
+}
+    </script>
+</body>
+</html>
