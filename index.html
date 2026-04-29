@@ -4,71 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="manifest" href="manifest.json">
-    <title>Coach</title>
+    <title>Vis</title>
     <style>
         :root { --bg: #F4F1EA; --clay: #E2725B; --text: #1A1A1A; --glass: rgba(255, 255, 255, 0.4); }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
-        header { padding: 50px 20px 10px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; }
-        .card { width: 85%; max-width: 380px; background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 35px; padding: 40px 20px; text-align: center; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; overflow: hidden; }
+        
+        /* Navigation Views */
+        .view { display: none; flex-direction: column; align-items: center; height: 100%; width: 100%; padding-top: 60px; }
+        .view.active { display: flex; }
+
+        header { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 20px; }
+        .card { width: 85%; max-width: 380px; background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 35px; padding: 40px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        
+        /* Workout UI */
         .ex-name { font-size: 24px; font-weight: 300; margin-bottom: 30px; }
         .stepper { display: flex; justify-content: space-around; margin-bottom: 40px; }
         .val { font-size: 48px; font-weight: 200; }
-        .unit { font-size: 10px; opacity: 0.4; text-transform: uppercase; margin-top: -5px; }
-        .btn-s { background: none; border: 1px solid rgba(0,0,0,0.05); width: 40px; height: 40px; border-radius: 50%; font-size: 18px; }
-        .log-circle { width: 140px; height: 140px; background: var(--clay); color: white; border: none; border-radius: 50%; font-size: 16px; font-weight: 500; cursor: pointer; position: relative; }
-        #timer-display { display: none; font-size: 32px; font-weight: 200; color: var(--clay); }
-        nav { position: absolute; bottom: 0; width: 100%; height: 80px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(0,0,0,0.05); }
-        .dot { width: 6px; height: 6px; background: var(--text); border-radius: 50%; opacity: 0.2; }
-        .active { opacity: 1; }
+        .unit { font-size: 10px; opacity: 0.4; text-transform: uppercase; }
+        .btn-s { background: none; border: 1px solid rgba(0,0,0,0.05); width: 44px; height: 44px; border-radius: 50%; font-size: 20px; }
+        .log-circle { width: 140px; height: 140px; background: var(--clay); color: white; border: none; border-radius: 50%; font-size: 16px; font-weight: 500; }
+        #timer-display { display: none; font-size: 48px; font-weight: 200; color: var(--clay); }
+
+        /* Coach UI */
+        textarea { width: 100%; height: 150px; background: none; border: 1px solid rgba(0,0,0,0.1); border-radius: 15px; padding: 15px; font-family: inherit; margin-top: 20px; }
+
+        /* Bottom Nav */
+        nav { position: fixed; bottom: 0; width: 100%; height: 80px; display: flex; justify-content: space-around; align-items: center; background: var(--bg); border-top: 1px solid rgba(0,0,0,0.05); }
+        .nav-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; opacity: 0.3; cursor: pointer; border: none; background: none; }
+        .nav-btn.active { opacity: 1; }
+        .icon { width: 8px; height: 8px; border: 1.5px solid var(--text); border-radius: 2px; }
     </style>
 </head>
 <body>
-    <header id="loc">Gym</header>
-    <div class="card">
-        <div class="ex-name" id="exName">Bench Press</div>
-        <div class="stepper">
-            <div><button class="btn-s" onclick="adj('w', 2.5)">+</button><div class="val" id="weight">95</div><div class="unit">kg</div><button class="btn-s" onclick="adj('w', -2.5)">−</button></div>
-            <div><button class="btn-s" onclick="adj('r', 1)">+</button><div class="val" id="reps">8</div><div class="unit">reps</div><button class="btn-s" onclick="adj('r', -1)">−</button></div>
+
+    <div id="view-train" class="view active">
+        <header>Gym</header>
+        <div class="card">
+            <div class="ex-name">Bench Press</div>
+            <div class="stepper">
+                <div><button class="btn-s" onclick="adj('w', 2.5)">+</button><div class="val" id="weight">95</div><div class="unit">kg</div><button class="btn-s" onclick="adj('w', -2.5)">−</button></div>
+                <div><button class="btn-s" onclick="adj('r', 1)">+</button><div class="val" id="reps">8</div><div class="unit">reps</div><button class="btn-s" onclick="adj('r', -1)">−</button></div>
+            </div>
+            <button class="log-circle" id="mainBtn" onclick="logSet()">LOG</button>
+            <div id="timer-display">90</div>
+            <div id="next" style="margin-top:25px; font-size:11px; opacity:0.3; letter-spacing:1px;">SET 1</div>
         </div>
-        <button class="log-circle" id="mainBtn" onclick="logSet()">LOG</button>
-        <div id="timer-display">1:30</div>
-        <div id="next" style="margin-top:25px; font-size:11px; opacity:0.3; letter-spacing:1px;">SET 1</div>
     </div>
-    <nav><div class="dot active"></div><div class="dot"></div><div class="dot"></div></nav>
+
+    <div id="view-coach" class="view">
+        <header>Coach</header>
+        <div class="card">
+            <div style="font-size:14px; opacity:0.7">Injuries or limitations?</div>
+            <textarea id="injuries" placeholder="Describe in natural language..."></textarea>
+            <button class="btn-s" style="margin-top:20px; width:auto; padding:0 20px; border-radius:20px;" onclick="saveCoach()">Save</button>
+        </div>
+    </div>
+
+    <nav>
+        <button class="nav-btn active" onclick="showView('train', this)"><div class="icon"></div></button>
+        <button class="nav-btn" onclick="showView('coach', this)"><div class="icon" style="border-radius: 50%;"></div></button>
+    </nav>
 
     <script>
-        let apiKey = localStorage.getItem('gemini_key');
-        if (!apiKey) {
-            apiKey = prompt("Enter Gemini API Key:");
-            localStorage.setItem('gemini_key', apiKey);
+        // API Setup
+        let apiKey = localStorage.getItem('gemini_key') || prompt("Enter Gemini API Key:");
+        localStorage.setItem('gemini_key', apiKey);
+
+        // View Router
+        function showView(viewId, btn) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            btn.classList.add('active');
         }
 
+        // Stepper Logic
         function adj(t, v) {
             let el = document.getElementById(t === 'w' ? 'weight' : 'reps');
-            el.innerText = parseFloat(el.innerText) + v;
+            el.innerText = (parseFloat(el.innerText) + v).toFixed(1).replace('.0', '');
+        }
+
+        // Timer Logic
+        function startTimer(seconds) {
+            const display = document.getElementById('timer-display');
+            const btn = document.getElementById('mainBtn');
+            btn.style.display = 'none';
+            display.style.display = 'block';
+            
+            let timeLeft = seconds;
+            const interval = setInterval(() => {
+                timeLeft--;
+                display.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    display.style.display = 'none';
+                    btn.style.display = 'block';
+                    display.innerText = seconds;
+                }
+            }, 1000);
         }
 
         async function logSet() {
-            const btn = document.getElementById('mainBtn');
-            const timer = document.getElementById('timer-display');
-            btn.style.display = 'none';
-            timer.style.display = 'block';
-            
-            // AI Call
-            const prompt = `User logged ${document.getElementById('weight').innerText}kg for ${document.getElementById('reps').innerText} reps at RPE 8. 42yo experienced lifter. Based on RPE 8, provide next set weight/reps. JSON format only: {"w": float, "r": int}`;
+            startTimer(90); // Hardcoded 90s rest
+            const nextLabel = document.getElementById('next');
+            nextLabel.innerText = "COACH ANALYZING...";
+
+            const context = localStorage.getItem('user_injuries') || "No injuries.";
+            const promptText = `Coach Context: ${context}. User logged ${document.getElementById('weight').innerText}kg x ${document.getElementById('reps').innerText} at RPE 8. Provide next set as JSON: {"w": float, "r": int}`;
             
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
                 });
                 const data = await res.json();
-                const cleanJson = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, ""));
-                document.getElementById('next').innerText = `NEXT: ${cleanJson.w}kg x ${cleanJson.r}`;
-            } catch (e) { console.error(e); }
+                const json = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, ""));
+                nextLabel.innerText = `NEXT: ${json.w}kg x ${json.r}`;
+            } catch (e) { nextLabel.innerText = "OFFLINE"; }
         }
 
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+        function saveCoach() {
+            localStorage.setItem('user_injuries', document.getElementById('injuries').value);
+            alert("Coach updated.");
+        }
     </script>
 </body>
 </html>
