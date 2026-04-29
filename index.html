@@ -11,160 +11,107 @@
             --bg: #F4F1EA; --clay: #E2725B; --moss: #4A5D4E; --text: #1A1A1A; 
             --glass: rgba(255, 255, 255, 0.7); --border: rgba(0, 0, 0, 0.08);
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: var(--bg); color: var(--text); margin: 0; height: 100vh; overflow: hidden; 
-        }
-
-        /* --- LAYOUT --- */
-        .view { display: none; flex-direction: column; height: 100vh; width: 100vw; padding: 60px 25px 120px; overflow-y: auto; }
-        .view.active { display: flex; animation: fadeIn 0.4s ease; }
-        header { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.4; margin-bottom: 40px; text-align: center; font-weight: 800; }
-        .card { background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-radius: 35px; padding: 30px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 15px 35px rgba(0,0,0,0.02); }
-
-        /* --- ONBOARDING --- */
-        .step { display: none; }
-        .step.active { display: block; }
-        h1 { font-size: 32px; font-weight: 300; margin: 0 0 15px; letter-spacing: -1px; }
-        p.sub { font-size: 14px; opacity: 0.5; margin-bottom: 30px; line-height: 1.5; }
-        input, select, textarea { width: 100%; background: rgba(0,0,0,0.04); border-radius: 20px; padding: 22px; font-size: 16px; margin-bottom: 15px; border: 1px solid transparent; font-family: inherit; transition: 0.3s; }
-        input:focus { background: white; border-color: var(--moss); }
-        .btn-prime { width: 100%; background: var(--text); color: var(--bg); border: none; padding: 24px; border-radius: 22px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; cursor: pointer; }
-
-        /* --- THE ENGINE --- */
-        .badge-row { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
-        .badge { font-size: 9px; font-weight: 800; padding: 10px 20px; border: 1.5px solid var(--text); border-radius: 25px; text-transform: uppercase; opacity: 0.2; cursor: pointer; transition: 0.3s; }
-        .badge.active { opacity: 1; background: var(--text); color: var(--bg); }
-
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 30px 0; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; overflow: hidden; }
+        .view { display: none; flex-direction: column; height: 100vh; width: 100vw; padding: 40px 25px 120px; overflow-y: auto; }
+        .view.active { display: flex; animation: fadeIn 0.3s ease; }
+        header { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 30px; text-align: center; font-weight: 800; }
+        .card { background: var(--glass); backdrop-filter: blur(20px); border-radius: 30px; padding: 25px; margin-bottom: 20px; border: 1px solid var(--border); }
+        h1 { font-size: 28px; font-weight: 300; margin: 0 0 10px; letter-spacing: -1px; }
+        .sub { font-size: 13px; opacity: 0.5; margin-bottom: 20px; }
+        label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; opacity: 0.6; }
+        select, input, textarea { width: 100%; background: rgba(0,0,0,0.04); border-radius: 15px; padding: 18px; font-size: 16px; border: 1px solid transparent; margin-bottom: 20px; font-family: inherit; }
+        .btn-prime { width: 100%; background: var(--text); color: var(--bg); border: none; padding: 22px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; }
+        
+        /* Stats & Timer */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
         .stat-box { text-align: center; }
-        .stat-val { font-size: 42px; font-weight: 200; margin: 8px 0; letter-spacing: -1px; }
-        .stat-unit { font-size: 9px; opacity: 0.4; text-transform: uppercase; font-weight: 700; }
-        .stepper { background: white; border: 1px solid var(--border); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .stat-val { font-size: 32px; font-weight: 200; }
+        .stat-unit { font-size: 8px; font-weight: 800; text-transform: uppercase; opacity: 0.4; }
+        .stepper { background: white; border: 1px solid var(--border); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 5px auto; }
 
-        /* --- CIRCLE TIMER --- */
-        .circle-container { position: relative; width: 180px; height: 180px; margin: 25px auto; display: flex; align-items: center; justify-content: center; }
-        .progress-svg { position: absolute; transform: rotate(-90deg); }
-        .log-btn { width: 140px; height: 140px; background: var(--clay); border: none; border-radius: 50%; color: white; font-weight: 800; font-size: 13px; letter-spacing: 2px; z-index: 10; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .log-btn:active { transform: scale(0.92); }
-        .timer-text { position: absolute; font-size: 48px; font-weight: 200; color: var(--clay); display: none; }
-
-        /* --- TACTICAL CONTROLS --- */
-        .tactical-row { display: flex; justify-content: space-around; margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px; }
-        .t-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.4; cursor: pointer; transition: 0.2s; }
-        .t-btn:hover { opacity: 1; }
-        .t-btn span { font-size: 9px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
-
-        /* --- NAV --- */
-        nav { position: fixed; bottom: 0; width: 100%; height: 95px; background: rgba(244, 241, 234, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); display: none; justify-content: space-around; align-items: center; padding-bottom: 25px; border-top: 1px solid var(--border); z-index: 100; }
+        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(244, 241, 234, 0.9); backdrop-filter: blur(10px); display: none; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); }
         nav.visible { display: flex; }
-        .n-btn { background: none; border: none; opacity: 0.2; padding: 15px; transition: 0.4s; }
-        .n-btn.active { opacity: 1; color: var(--moss); transform: translateY(-5px); }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .n-btn { background: none; border: none; opacity: 0.3; padding: 20px; }
+        .n-btn.active { opacity: 1; color: var(--moss); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div id="v-onboard" class="view active">
-        <header>Constructing Form</header>
+        <header>Initialize Form</header>
         <div class="card">
             <div id="step1" class="step active">
                 <h1>Identity</h1>
-                <p class="sub">Your biological starting point.</p>
-                <input type="text" id="in-name" placeholder="Name">
-                <input type="number" id="in-age" placeholder="Age">
-                <input type="text" id="in-exp" placeholder="Experience (e.g. 10+ years)">
-                <button class="btn-prime" onclick="nextStep(2)">Continue</button>
+                <label>Biological Sex</label>
+                <select id="in-sex"><option>Male</option><option>Female</option><option>Other</option></select>
+                <label>Training Experience</label>
+                <select id="in-exp">
+                    <option value="none">None (Beginner)</option>
+                    <option value="some">Some Experience</option>
+                    <option value="very">Very Experienced</option>
+                    <option value="expert">Expert (Elite)</option>
+                </select>
+                <button class="btn-prime" onclick="nextStep(2)">Next</button>
             </div>
             <div id="step2" class="step">
-                <h1>The Baseline</h1>
-                <p class="sub">Define your core strength goal (e.g. 95kg Bench).</p>
-                <textarea id="in-goals" placeholder="Primary Goals & Objectives"></textarea>
-                <input type="text" id="in-baseline" placeholder="Bench Press Max (kg)">
-                <button class="btn-prime" onclick="nextStep(3)">Continue</button>
+                <h1>Goals</h1>
+                <label>Primary Focus</label>
+                <select id="in-goal-type">
+                    <option>Hypertrophy (Muscle Growth)</option>
+                    <option>Strength (Powerlifting Style)</option>
+                    <option>General Fitness / Health</option>
+                    <option>Longevity / Mobility</option>
+                </select>
+                <label>Optional: Estimated 1RM (kg)</label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <input type="number" id="br-sq" placeholder="Squat">
+                    <input type="number" id="br-bp" placeholder="Bench">
+                </div>
+                <button class="btn-prime" onclick="nextStep(3)">Next</button>
             </div>
             <div id="step3" class="step">
-                <h1>The Context</h1>
-                <p class="sub">Workouts per week and equipment availability.</p>
-                <div style="display:flex; gap:10px;">
-                    <input type="number" id="in-freq" placeholder="Days/Wk">
-                    <input type="number" id="in-dur" placeholder="Mins/Sess">
-                </div>
-                <textarea id="in-gym" placeholder="Gym Equipment List"></textarea>
-                <textarea id="in-home" placeholder="Home Equipment List"></textarea>
-                <button class="btn-prime" onclick="completeOnboarding()">Initialize Engine</button>
+                <h1>Parameters</h1>
+                <label>Frequency (Days/Week)</label>
+                <select id="in-freq"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
+                <label>Session Duration (Mins)</label>
+                <select id="in-dur"><option>15</option><option>30</option><option selected>45</option><option>60</option><option>90</option></select>
+                <label>Equipment Availability</label>
+                <textarea id="in-equip" placeholder="Describe your gym/home setup..."></textarea>
+                <button class="btn-prime" onclick="completeOnboarding()">Generate Program</button>
             </div>
         </div>
     </div>
 
     <div id="v-train" class="view">
-        <div class="badge-row">
-            <div id="b-gym" class="badge active" onclick="switchMode('gym')">Gym</div>
-            <div id="b-home" class="badge" onclick="switchMode('home')">Home</div>
-        </div>
-        <header id="target-header">Strategic Prescription</header>
-        <div class="card">
-            <h2 id="ex-name" style="font-weight:200; text-align:center; font-size:28px; margin:0 0 10px;">Select Movement</h2>
-            <div class="stat-grid">
-                <div class="stat-box">
-                    <div class="stepper" onclick="adj('w', 2.5)">+</div>
-                    <div class="stat-val" id="val-w">0</div><div class="stat-unit">kg</div>
-                    <div class="stepper" onclick="adj('w', -2.5)">-</div>
+        <header id="workout-label">Active Session</header>
+        <div id="workout-container">
+            <div class="card">
+                <h2 id="ex-name" style="font-weight:300; text-align:center;">Squat (Example)</h2>
+                <div class="stat-grid">
+                    <div class="stat-box"><div class="stepper" onclick="adj('w', 2.5)">+</div><div class="stat-val" id="val-w">60</div><div class="stat-unit">kg</div></div>
+                    <div class="stat-box"><div class="stepper" onclick="adj('r', 1)">+</div><div class="stat-val" id="val-r">8</div><div class="stat-unit">reps</div></div>
+                    <div class="stat-box"><div class="stepper" onclick="adj('e', 0.5)">+</div><div class="stat-val" id="val-e">7.0</div><div class="stat-unit">RPE</div></div>
                 </div>
-                <div class="stat-box">
-                    <div class="stepper" onclick="adj('r', 1)">+</div>
-                    <div class="stat-val" id="val-r">0</div><div class="stat-unit">reps</div>
-                    <div class="stepper" onclick="adj('r', -1)">-</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stepper" onclick="adj('e', 0.5)">+</div>
-                    <div class="stat-val" id="val-e">7.0</div><div class="stat-unit">RPE</div>
-                    <div class="stepper" onclick="adj('e', -0.5)">-</div>
-                </div>
-            </div>
-
-            <div class="circle-container">
-                <svg class="progress-svg" width="180" height="180">
-                    <circle cx="90" cy="90" r="85" stroke="rgba(0,0,0,0.04)" stroke-width="3" fill="none" />
-                    <circle id="ring" cx="90" cy="90" r="85" stroke="#E2725B" stroke-width="3" fill="none" stroke-dasharray="534" stroke-dashoffset="534" stroke-linecap="round" />
-                </svg>
-                <button class="log-btn" id="log-action" onclick="handleLog()">LOG SET</button>
-                <div class="timer-text" id="timer-val">0</div>
-            </div>
-
-            <div class="tactical-row">
-                <button onclick="aiSwap()" class="t-btn"><i data-lucide="refresh-cw" size="18"></i><span>Swap</span></button>
-                <button onclick="addSet()" class="t-btn"><i data-lucide="plus-circle" size="18"></i><span>+Set</span></button>
-                <button onclick="flagInjury()" class="t-btn" style="color:var(--clay)"><i data-lucide="alert-triangle" size="18"></i><span>Flag</span></button>
+                <button class="btn-prime" onclick="logSet()">Log Set</button>
             </div>
         </div>
-        <button class="btn-prime" style="background:var(--moss)" onclick="endSession()">End Session & Review</button>
-    </div>
-
-    <div id="v-coach" class="view">
-        <header>Program Director</header>
-        <div id="chat-stream" style="flex:1; overflow-y:auto; padding:10px 0; display:flex; flex-direction:column; gap:15px;"></div>
-        <div style="display:flex; gap:12px; align-items:center;">
-            <input type="text" id="chat-input" placeholder="Talk to the coach..." style="margin:0;">
-            <button onclick="sendChat()" style="background:var(--moss); color:white; border:none; width:60px; height:60px; border-radius:20px; display:flex; align-items:center; justify-content:center;"><i data-lucide="send" size="20"></i></button>
-        </div>
+        <button class="btn-prime" style="background:var(--moss)" onclick="endSession()">End & Strategic Review</button>
     </div>
 
     <div id="v-settings" class="view">
-        <header>System Configuration</header>
-        <div class="card" id="profile-summary"></div>
+        <header>System State</header>
+        <div class="card" id="user-profile-data"></div>
         <div class="card">
-            <p class="sub" style="margin-bottom:10px;">AI Integration</p>
-            <input type="password" id="api-key" placeholder="Gemini API Key">
-            <button class="btn-prime" onclick="saveKey()">Update Key</button>
+            <label>API Key</label>
+            <input type="password" id="api-key" placeholder="Enter Gemini Key">
+            <button class="btn-prime" onclick="saveKey()">Save Config</button>
         </div>
-        <button onclick="wipe()" style="color:var(--clay); border:none; background:none; font-size:11px; font-weight:800; letter-spacing:1px; width:100%; margin-top:30px;">WIPE MASTER RECORD</button>
+        <button onclick="localStorage.clear(); location.reload();" style="color:red; background:none; border:none; width:100%; font-size:10px; font-weight:800;">WIPE DATA & RESTART</button>
     </div>
 
     <nav id="navbar">
-        <button class="n-btn" onclick="showTab('coach', this)"><i data-lucide="message-square"></i></button>
         <button class="n-btn active" onclick="showTab('train', this)"><i data-lucide="dumbbell"></i></button>
         <button class="n-btn" onclick="showTab('settings', this)"><i data-lucide="sliders"></i></button>
     </nav>
@@ -173,8 +120,7 @@
         let state = {
             profile: JSON.parse(localStorage.getItem('form_profile')) || null,
             apiKey: localStorage.getItem('form_key') || '',
-            mode: 'gym',
-            logs: []
+            session: []
         };
 
         function init() {
@@ -182,16 +128,9 @@
                 document.getElementById('v-onboard').classList.remove('active');
                 document.getElementById('v-train').classList.add('active');
                 document.getElementById('navbar').classList.add('visible');
-                renderSettings();
+                renderProfile();
             }
             lucide.createIcons();
-
-            // Register Service Worker for PWA Offline Support
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js')
-                .then(() => console.log("Form: Offline Engine Active"))
-                .catch((err) => console.log("Form: Offline Engine Failed", err));
-            }
         }
 
         function nextStep(n) {
@@ -201,13 +140,12 @@
 
         function completeOnboarding() {
             state.profile = {
-                name: document.getElementById('in-name').value,
-                age: document.getElementById('in-age').value,
+                sex: document.getElementById('in-sex').value,
                 exp: document.getElementById('in-exp').value,
-                goals: document.getElementById('in-goals').value,
-                baseline: document.getElementById('in-baseline').value,
-                schedule: { freq: document.getElementById('in-freq').value, dur: document.getElementById('in-dur').value },
-                equipment: { gym: document.getElementById('in-gym').value, home: document.getElementById('in-home').value }
+                goal: document.getElementById('in-goal-type').value,
+                benchmarks: { sq: document.getElementById('br-sq').value, bp: document.getElementById('br-bp').value },
+                params: { freq: document.getElementById('in-freq').value, dur: document.getElementById('in-dur').value },
+                equip: document.getElementById('in-equip').value
             };
             localStorage.setItem('form_profile', JSON.stringify(state.profile));
             location.reload();
@@ -219,52 +157,6 @@
             el.innerText = n % 1 === 0 ? n : n.toFixed(1);
         }
 
-        function handleLog() {
-            const data = {
-                ex: document.getElementById('ex-name').innerText,
-                w: document.getElementById('val-w').innerText,
-                r: document.getElementById('val-r').innerText,
-                e: document.getElementById('val-e').innerText,
-                ts: new Date().toISOString()
-            };
-            state.logs.push(data);
-            
-            // Strategic Rest: Prescribed based on RPE
-            let restTime = parseFloat(data.e) >= 9 ? 180 : 90;
-            startTimer(restTime);
-        }
-
-        function startTimer(sec) {
-            const btn = document.getElementById('log-action');
-            const txt = document.getElementById('timer-val');
-            const ring = document.getElementById('ring');
-            btn.style.display = 'none';
-            txt.style.display = 'block';
-            let left = sec;
-            const timer = setInterval(() => {
-                left--;
-                txt.innerText = left;
-                ring.style.strokeDashoffset = 534 - (left / sec) * 534;
-                if(left <= 0) { 
-                    clearInterval(timer); btn.style.display = 'block'; txt.style.display = 'none'; 
-                    ring.style.strokeDashoffset = 534;
-                }
-            }, 1000);
-        }
-
-        async function endSession() {
-            if(!state.apiKey) return alert("Please set API Key to run Strategic Review.");
-            alert("Coach is performing a Strategic Review of this session...");
-            state.logs = [];
-            alert("Program updated conservatively for next session.");
-        }
-
-        function switchMode(m) {
-            state.mode = m;
-            document.querySelectorAll('.badge').forEach(b => b.classList.remove('active'));
-            document.getElementById('b-'+m).classList.add('active');
-        }
-
         function showTab(t, btn) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('active'));
@@ -272,28 +164,19 @@
             btn.classList.add('active');
         }
 
-        function renderSettings() {
+        function renderProfile() {
             const p = state.profile;
-            document.getElementById('profile-summary').innerHTML = `
-                <p style="font-weight:700; margin:0;">${p.name}</p>
-                <p style="font-size:12px; opacity:0.5;">${p.age}y • ${p.exp}</p>
-                <hr style="border:none; border-top:1px solid var(--border); margin:15px 0;">
-                <p style="font-size:13px;"><b>Baseline:</b> ${p.baseline}kg</p>
-                <p style="font-size:13px;"><b>Goals:</b> ${p.goals}</p>
+            document.getElementById('user-profile-data').innerHTML = `
+                <p><b>Goal:</b> ${p.goal}</p>
+                <p><b>Experience:</b> ${p.exp}</p>
+                <p><b>Frequency:</b> ${p.params.freq} days/wk</p>
             `;
         }
 
         function saveKey() {
-            state.apiKey = document.getElementById('api-key').value;
-            localStorage.setItem('form_key', state.apiKey);
-            alert("System State Updated.");
+            localStorage.setItem('form_key', document.getElementById('api-key').value);
+            alert("API Key Saved. The Coach is now active.");
         }
-
-        function wipe() { if(confirm("Erase all data?")) { localStorage.clear(); location.reload(); } }
-
-        function aiSwap() { alert("Coach: Analyzing biomechanical equivalents..."); }
-        function addSet() { alert("Set added."); }
-        function flagInjury() { alert("Flagged for strategic review."); }
 
         init();
     </script>
