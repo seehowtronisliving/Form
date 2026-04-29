@@ -12,7 +12,178 @@
             --border: rgba(0,0,0,0.1); --card: #FFFFFF;
             --mono: 'SF Mono', 'Fira Code', monospace; --serif: "Georgia", serif;
         }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Form | Strategic Strength</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { 
+            --bg: #F4F1EA; --clay: #E2725B; --moss: #4A5D4E; --text: #1A1A1A; 
+            --border: rgba(0,0,0,0.1); --card: #FFFFFF;
+            --mono: 'SF Mono', 'Fira Code', monospace; --serif: "Georgia", serif;
+        }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; overflow: hidden; }
+        h1 { font-family: var(--serif); font-size: 26px; font-weight: 300; margin: 0; }
+        .num { font-family: var(--mono); font-weight: 600; }
+        label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; margin: 15px 0 5px; opacity: 0.6; letter-spacing: 1px; }
+
+        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: white; display: none; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 20px; z-index: 1000; }
+        nav.visible { display: flex; }
+        .nav-item { background: none; border: none; opacity: 0.3; text-align: center; font-size: 9px; font-weight: 700; flex: 1; color: var(--text); }
+        .nav-item.active { opacity: 1; color: var(--moss); }
+
+        .view { display: none; flex-direction: column; height: 100vh; padding: 40px 20px 100px; overflow-y: auto; }
+        .view.active { display: flex; }
+        .card { background: var(--card); border-radius: 12px; padding: 18px; margin-bottom: 12px; border: 1px solid var(--border); }
+        input, textarea { width: 100%; background: #F9F9F8; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: var(--mono); font-size: 14px; margin-bottom: 10px; color: var(--text); }
+        .btn { width: 100%; background: var(--text); color: var(--bg); border: none; padding: 16px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; }
+        
+        #timer-ov { display: none; position: fixed; inset: 0; background: var(--moss); color: white; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
+        #t-val { font-family: var(--mono); font-size: 80px; }
+        .err { color: var(--clay); font-size: 12px; font-family: var(--mono); margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="timer-ov">
+        <label style="color:white; opacity:0.8">Recovery Phase</label>
+        <div id="t-val">01:30</div>
+        <button class="btn" style="width:auto; background:white; color:var(--moss); padding: 12px 40px;" onclick="stopT()">Skip</button>
+    </div>
+
+    <div id="v-setup" class="view active">
+        <div class="card" id="setup-card">
+            <h1>Initial Set Up</h1>
+            <div id="setup-content">
+                <label>API Key</label>
+                <input type="password" id="init-key" placeholder="Enter Gemini Key">
+                <button class="btn" onclick="startOnboarding()">Begin Interview</button>
+                <div id="setup-err" class="err"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-log" class="view">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:15px;">
+            <h1 id="log-day-title">Workout</h1>
+            <div id="log-clock" class="num" style="color:var(--clay)">00:00</div>
+        </div>
+        <div id="log-mount"></div>
+        <button class="btn" style="background:var(--moss); margin-top:15px" onclick="completeWorkout()">Finish & Sync</button>
+    </div>
+
+    <div id="v-prog" class="view"><h1>Program</h1><div id="prog-mount" style="margin-top:20px"></div></div>
+
+    <div id="v-stat" class="view"><h1>Progress</h1><div id="hist-mount"></div></div>
+
+    <div id="v-chat" class="view">
+        <h1>Trainer</h1>
+        <div id="chat-mount" style="flex:1; overflow-y:auto; padding: 15px 0;"></div>
+        <div style="display:flex; gap:10px; background:white; padding:12px; border-radius:15px; border:1px solid var(--border)">
+            <input type="text" id="chat-in" placeholder="Message..." style="border:none; background:none; margin:0">
+            <button class="btn" style="width:50px; padding:0" onclick="sendChat()"><i data-lucide="send"></i></button>
+        </div>
+    </div>
+
+    <div id="v-set" class="view"><h1>Settings</h1><div id="settings-mount"></div></div>
+
+    <nav id="nav">
+        <button class="nav-item active" onclick="tab('log', this)"><i data-lucide="clipboard-list"></i><br>Log</button>
+        <button class="nav-item" onclick="tab('prog', this)"><i data-lucide="calendar"></i><br>Program</button>
+        <button class="nav-item" onclick="tab('stat', this)"><i data-lucide="trending-up"></i><br>Stats</button>
+        <button class="nav-item" onclick="tab('chat', this)"><i data-lucide="message-circle"></i><br>Trainer</button>
+        <button class="nav-item" onclick="tab('set', this)"><i data-lucide="sliders"></i><br>Settings</button>
+    </nav>
+
+    <script>
+        let APP = {
+            settings: JSON.parse(localStorage.getItem('f_settings')) || { key: '', profile: {}, history: [] },
+            program: JSON.parse(localStorage.getItem('f_program')) || [],
+            active: JSON.parse(localStorage.getItem('f_active')) || null
+        };
+
+        async function startOnboarding() {
+            const key = document.getElementById('init-key').value.trim();
+            if(!key) return;
+            APP.settings.key = key;
+            const mount = document.getElementById('setup-content');
+            const errBox = document.getElementById('setup-err');
+            
+            mount.innerHTML = `<div class="num" style="font-size:12px; opacity:0.5">INITIALIZING AI TRAINER...</div>`;
+            
+            try {
+                const res = await aiTalk("Introduce yourself as the AI Trainer. Ask me 3 questions to build my Profile: my fitness goals, my current strength levels, and my available equipment.");
+                mount.innerHTML = `
+                    <div style="font-size:14px; line-height:1.6; margin-bottom:20px;">${res.text}</div>
+                    <textarea id="ob-ans" placeholder="Type your answers here..." style="height:120px"></textarea>
+                    <button class="btn" onclick="continueOnboarding()">Submit Answers</button>
+                `;
+            } catch (e) {
+                mount.innerHTML = `<label>Setup Failed</label><input type="password" id="init-key" placeholder="Retry Key"><button class="btn" onclick="startOnboarding()">Retry</button><div class="err">Error: ${e.message}</div>`;
+            }
+        }
+
+        async function continueOnboarding() {
+            const ans = document.getElementById('ob-ans').value;
+            const mount = document.getElementById('setup-content');
+            mount.innerHTML = `<div class="num" style="font-size:12px; opacity:0.5">GENERATING PROGRAM...</div>`;
+            
+            const res = await aiTalk(ans + " Build my Profile and generate a 4-week Program. Output as JSON. COMMAND: {\"type\":\"SET_PROG\", \"data\":[{\"name\":\"Day 1\", \"ex\":[{\"name\":\"Squat\", \"w\":60, \"s\":3, \"r\":5}]}], \"profile\":{}}");
+            
+            if(res.cmd) {
+                APP.program = res.cmd.data;
+                APP.settings.profile = res.cmd.profile || {};
+                save();
+                location.reload();
+            }
+        }
+
+        async function aiTalk(msg) {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${APP.settings.key}`;
+            const prompt = `Act as an elite Strength Trainer. Terminology: Trainee, Profile, Program, Log. Commands: COMMAND: {"type":"SET_PROG", "data":[], "profile":{}}. Current Program: ${JSON.stringify(APP.program)}`;
+            
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt + " Trainee: " + msg }] }] })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error.message || "API Connection Failed");
+            }
+
+            const data = await response.json();
+            const raw = data.candidates[0].content.parts[0].text;
+            return { text: raw.split('COMMAND:')[0], cmd: raw.includes('COMMAND:') ? JSON.parse(raw.split('COMMAND:')[1].trim()) : null };
+        }
+
+        function save() {
+            localStorage.setItem('f_settings', JSON.stringify(APP.settings));
+            localStorage.setItem('f_program', JSON.stringify(APP.program));
+            localStorage.setItem('f_active', JSON.stringify(APP.active));
+        }
+
+        function tab(t, el) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('v-'+t).classList.add('active');
+            el.classList.add('active');
+        }
+
+        if(APP.settings.key && APP.program.length > 0) {
+            document.getElementById('v-setup').classList.remove('active');
+            document.getElementById('v-log').classList.add('active');
+            document.getElementById('nav').classList.add('visible');
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; overflow: hidden; }
         
         h1 { font-family: var(--serif); font-size: 26px; font-weight: 300; margin: 0; }
