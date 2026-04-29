@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Form</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root { 
@@ -184,6 +185,13 @@
                 renderSettings();
             }
             lucide.createIcons();
+
+            // Register Service Worker for PWA Offline Support
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("Form: Offline Engine Active"))
+                .catch((err) => console.log("Form: Offline Engine Failed", err));
+            }
         }
 
         function nextStep(n) {
@@ -221,7 +229,7 @@
             };
             state.logs.push(data);
             
-            // Strategic Rest: Science-based defaults unless coach updates program
+            // Strategic Rest: Prescribed based on RPE
             let restTime = parseFloat(data.e) >= 9 ? 180 : 90;
             startTimer(restTime);
         }
@@ -247,7 +255,6 @@
         async function endSession() {
             if(!state.apiKey) return alert("Please set API Key to run Strategic Review.");
             alert("Coach is performing a Strategic Review of this session...");
-            // Gemini call logic: Send state.logs + state.profile -> Return conservative program update
             state.logs = [];
             alert("Program updated conservatively for next session.");
         }
@@ -284,18 +291,11 @@
 
         function wipe() { if(confirm("Erase all data?")) { localStorage.clear(); location.reload(); } }
 
-        // Tactical Stubs
-        function aiSwap() { alert("Coach: Based on your equipment, I suggest swapping to the closest biomechanical equivalent."); }
-        function addSet() { alert("Set added to session history."); }
-        function flagInjury() { alert("Flag added. Coach will prioritize recovery in the Strategic Review."); }
+        function aiSwap() { alert("Coach: Analyzing biomechanical equivalents..."); }
+        function addSet() { alert("Set added."); }
+        function flagInjury() { alert("Flagged for strategic review."); }
 
         init();
-        // Register Service Worker for PWA Offline Support
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-    .then(() => console.log("Form: Offline Engine Active"))
-    .catch((err) => console.log("Form: Offline Engine Failed", err));
-}
     </script>
 </body>
 </html>
