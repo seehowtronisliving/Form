@@ -11,249 +11,192 @@
             --border: rgba(0,0,0,0.1); --card: #FFFFFF;
             --mono: 'SF Mono', 'Fira Code', monospace; --serif: "Georgia", serif;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; overflow: hidden; }
-        
         h1 { font-family: var(--serif); font-size: 26px; font-weight: 300; margin: 0; }
-        .num { font-family: var(--mono); font-weight: 600; }
-        label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; margin: 15px 0 5px; opacity: 0.6; letter-spacing: 1px; }
-
-        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: white; display: none; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 25px; z-index: 1000; }
-        nav.visible { display: flex; }
-        .nav-item { background: none; border: none; opacity: 0.3; text-align: center; font-size: 9px; font-weight: 700; flex: 1; color: var(--text); }
-        .nav-item.active { opacity: 1; color: var(--moss); }
-
         .view { display: none; flex-direction: column; height: 100vh; padding: 40px 20px 100px; overflow-y: auto; }
         .view.active { display: flex; }
         .card { background: var(--card); border-radius: 12px; padding: 18px; margin-bottom: 12px; border: 1px solid var(--border); }
-        
+        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: white; display: none; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 25px; z-index: 1000; }
+        nav.visible { display: flex; }
+        .nav-item { background: none; border: none; opacity: 0.3; text-align: center; font-size: 9px; font-weight: 700; flex: 1; color: var(--text); cursor: pointer; }
+        .nav-item.active { opacity: 1; color: var(--moss); }
         input, textarea { width: 100%; background: #F9F9F8; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: var(--mono); font-size: 14px; margin-bottom: 10px; color: var(--text); }
         .btn { width: 100%; background: var(--text); color: var(--bg); border: none; padding: 16px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; }
+        .num { font-family: var(--mono); font-weight: 600; }
+        .err-msg { background: #FFF0ED; color: #E2725B; padding: 10px; border-radius: 8px; font-family: var(--mono); font-size: 11px; margin-top: 10px; white-space: pre-wrap; }
         
-        .ex-header { display: flex; justify-content: space-between; align-items: center; }
-        .ex-content { display: none; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; }
-        .ex-content.open { display: block; }
-        .stepper { display: flex; align-items: center; gap: 5px; background: var(--bg); border-radius: 8px; padding: 4px; border: 1px solid var(--border); }
-        .set-node { width: 42px; height: 42px; border-radius: 8px; background: #EEE; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-weight: 800; }
+        /* Log specifics */
+        .ex-content { display: block; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; }
+        .set-node { width: 42px; height: 42px; border-radius: 8px; background: #EEE; display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-weight: 800; margin: 4px; }
         .set-node.done { background: var(--moss); color: white; }
-
-        #timer-ov { display: none; position: fixed; inset: 0; background: var(--moss); color: white; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
-        #t-val { font-family: var(--mono); font-size: 80px; }
-        .err-log { margin-top: 20px; padding: 12px; background: #FFF0ED; border: 1px solid var(--clay); border-radius: 8px; font-family: var(--mono); font-size: 10px; color: var(--clay); white-space: pre-wrap; }
     </style>
 </head>
 <body>
 
-    <div id="timer-ov">
-        <div id="t-val">90</div>
-        <button class="btn" style="width:auto; background:white; color:var(--moss); padding: 12px 40px;" onclick="stopT()">Skip</button>
-    </div>
-
     <div id="v-setup" class="view active">
         <div class="card">
-            <h1>Set Up</h1>
+            <h1>Initial Set Up</h1>
             <div id="setup-content">
-                <label>API Key</label>
-                <input type="password" id="init-key" placeholder="Paste Gemini Key Here">
-                <button class="btn" onclick="startOnboarding()">Connect AI Trainer</button>
-                <div id="setup-debug"></div>
+                <label style="display:block; font-size:10px; font-weight:800; margin-bottom:5px">GEMINI API KEY</label>
+                <input type="password" id="init-key" placeholder="Paste Key Here">
+                <button class="btn" onclick="UI.start()">Connect AI Trainer</button>
             </div>
+            <div id="setup-err"></div>
         </div>
     </div>
 
     <div id="v-log" class="view">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:15px;">
-            <h1 id="log-day-title">Today's Session</h1>
-            <div id="log-clock" class="num" style="color:var(--clay)">00:00</div>
-        </div>
-        <div id="log-mount"></div>
-        <button class="btn" style="background:var(--moss); margin-top:20px" onclick="completeWorkout()">Complete Session</button>
+        <h1 id="day-title">Today's Session</h1>
+        <div id="log-mount" style="margin-top:20px"></div>
+        <button class="btn" style="background:var(--moss); margin-top:20px" onclick="UI.finish()">Complete Session</button>
     </div>
 
-    <div id="v-prog" class="view"><h1>Program</h1><div id="prog-mount" style="margin-top:20px"></div></div>
-
-    <div id="v-stat" class="view"><h1>Progress</h1><div id="hist-mount" style="margin-top:20px"></div></div>
-
-    <div id="v-chat" class="view">
-        <h1>Trainer</h1>
-        <div id="chat-mount" style="flex:1; overflow-y:auto; padding: 15px 0;"></div>
-        <div style="display:flex; gap:10px; background:white; padding:12px; border-radius:15px; border:1px solid var(--border)">
-            <input type="text" id="chat-in" placeholder="Ask trainer..." style="border:none; background:none; margin:0">
-            <button class="btn" style="width:50px; padding:0" onclick="sendChat()"><i data-lucide="send"></i></button>
-        </div>
+    <div id="v-prog" class="view">
+        <h1>Program</h1>
+        <div id="prog-mount" style="margin-top:20px"></div>
     </div>
 
     <div id="v-set" class="view">
         <h1>Settings</h1>
-        <div id="settings-mount"></div>
+        <div class="card" style="margin-top:20px">
+            <button class="btn" style="background:var(--clay)" onclick="localStorage.clear(); location.reload();">Hard Reset App</button>
+        </div>
     </div>
 
-    <nav id="nav">
-        <button class="nav-item active" onclick="tab('log', this)"><i data-lucide="clipboard-list"></i><br>Log</button>
-        <button class="nav-item" onclick="tab('prog', this)"><i data-lucide="calendar"></i><br>Program</button>
-        <button class="nav-item" onclick="tab('stat', this)"><i data-lucide="trending-up"></i><br>Stats</button>
-        <button class="nav-item" onclick="tab('chat', this)"><i data-lucide="message-circle"></i><br>Trainer</button>
-        <button class="nav-item" onclick="tab('set', this)"><i data-lucide="sliders"></i><br>Settings</button>
+    <nav id="nav-bar">
+        <button class="nav-item active" onclick="UI.tab('log', this)"><i data-lucide="clipboard-list"></i><br>Log</button>
+        <button class="nav-item" onclick="UI.tab('prog', this)"><i data-lucide="calendar"></i><br>Program</button>
+        <button class="nav-item" onclick="UI.tab('set', this)"><i data-lucide="sliders"></i><br>Settings</button>
     </nav>
 
     <script>
-        // Global State
-        let APP = {
-            settings: JSON.parse(localStorage.getItem('f_settings')) || { key: '', profile: {}, history: [] },
-            program: JSON.parse(localStorage.getItem('f_program')) || [],
-            active: JSON.parse(localStorage.getItem('f_active')) || null,
-            timer: null
-        };
+    // --- APP DATA ---
+    const APP = {
+        data: {
+            key: localStorage.getItem('f_key') || '',
+            profile: JSON.parse(localStorage.getItem('f_prof')) || {},
+            program: JSON.parse(localStorage.getItem('f_prog')) || []
+        },
+        active: null
+    };
 
-        // --- THE AI HANDSHAKE ---
-        async function aiTalk(msg) {
-            const models = ["gemini-1.5-flash", "gemini-1.5-flash-latest"];
-            let lastErr = "";
-
-            for (let model of models) {
-                try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${APP.settings.key}`;
-                    const prompt = `System: You are the AI Strength Coach. 
-                    If ready to build the program, conclude with COMMAND: {"type":"SET_PROG", "data": [...], "profile": {...}}.
-                    Current Profile: ${JSON.stringify(APP.settings.profile)}`;
-
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt + " Trainee: " + msg }] }] })
-                    });
-
-                    if (!response.ok) {
-                        const errData = await response.json();
-                        throw new Error(errData.error ? errData.error.message : "HTTP Error");
-                    }
-
-                    const data = await response.json();
-                    const raw = data.candidates[0].content.parts[0].text;
-                    return { 
-                        text: raw.split('COMMAND:')[0], 
-                        cmd: raw.includes('COMMAND:') ? JSON.parse(raw.split('COMMAND:')[1].trim()) : null 
-                    };
-                } catch (e) {
-                    lastErr = e.message;
-                    continue; // Try next model identifier
-                }
-            }
-            throw new Error(lastErr);
-        }
-
-        // --- SETUP FLOW ---
-        async function startOnboarding() {
-            const keyInput = document.getElementById('init-key');
-            if(!keyInput || !keyInput.value) return;
+    // --- UI ACTIONS ---
+    const UI = {
+        async start() {
+            const key = document.getElementById('init-key').value.trim();
+            if(!key) return;
+            APP.data.key = key;
+            localStorage.setItem('f_key', key);
             
-            APP.settings.key = keyInput.value.trim();
             const mount = document.getElementById('setup-content');
-            mount.innerHTML = `<div class="num" style="font-size:11px; opacity:0.5">ESTABLISHING ENCRYPTED LINK...</div>`;
+            mount.innerHTML = `<p style="font-family:var(--mono); font-size:12px; opacity:0.5">ESTABLISHING LINK...</p>`;
             
             try {
-                const res = await aiTalk("Introduce yourself and ask questions to build my strength profile (Goals, Equipment, Lifts).");
+                const res = await this.aiTalk("Introduce yourself and ask questions to build my strength profile.");
                 mount.innerHTML = `
-                    <div style="font-size:14px; line-height:1.6; margin-bottom:20px; font-family:var(--serif);">${res.text}</div>
+                    <div style="font-size:14px; line-height:1.6; margin-bottom:20px;">${res.text}</div>
                     <textarea id="ob-ans" placeholder="Your reply..."></textarea>
-                    <button class="btn" onclick="continueOnboarding()">Submit</button>
+                    <button class="btn" onclick="UI.onboardNext()">Submit</button>
                 `;
             } catch (e) {
-                mount.innerHTML = `
-                    <input type="password" id="init-key" placeholder="Enter API Key">
-                    <button class="btn" onclick="startOnboarding()">Retry</button>
-                    <div class="err-log"><strong>Debug Info:</strong>\n${e.message}</div>
-                `;
+                document.getElementById('setup-err').innerHTML = `<div class="err-msg">Connection Error: ${e.message}</div>`;
+                mount.innerHTML = `<input type="password" id="init-key" placeholder="Paste Key"><button class="btn" onclick="UI.start()">Retry</button>`;
             }
-        }
+        },
 
-        async function continueOnboarding() {
+        async onboardNext() {
             const ans = document.getElementById('ob-ans').value;
             const mount = document.getElementById('setup-content');
-            mount.innerHTML = `<div class="num" style="font-size:11px; opacity:0.5">GENERATING STRATEGY...</div>`;
+            mount.innerHTML = `<p style="font-family:var(--mono); font-size:12px; opacity:0.5">COMPUTING PROGRAM...</p>`;
             
             try {
-                const res = await aiTalk(ans + " (Build profile and program COMMAND if ready)");
+                const res = await this.aiTalk(ans + " Build my profile and program JSON. COMMAND: {\"type\":\"SET_PROG\", \"data\": [...], \"profile\": {...}}");
                 if(res.cmd) {
-                    APP.program = res.cmd.data;
-                    APP.settings.profile = res.cmd.profile;
-                    save(); location.reload();
+                    APP.data.program = res.cmd.data;
+                    APP.data.profile = res.cmd.profile;
+                    localStorage.setItem('f_prog', JSON.stringify(res.cmd.data));
+                    localStorage.setItem('f_prof', JSON.stringify(res.cmd.profile));
+                    location.reload();
                 } else {
-                    mount.innerHTML = `
-                        <div style="font-size:14px; line-height:1.6; margin-bottom:20px; font-family:var(--serif);">${res.text}</div>
-                        <textarea id="ob-ans" placeholder="Next reply..."></textarea>
-                        <button class="btn" onclick="continueOnboarding()">Submit</button>
-                    `;
+                    mount.innerHTML = `<div style="font-size:14px; margin-bottom:20px;">${res.text}</div><textarea id="ob-ans"></textarea><button class="btn" onclick="UI.onboardNext()">Submit</button>`;
                 }
-            } catch (e) { mount.innerHTML = `<div class="err-log">${e.message}</div>`; }
-        }
-
-        // --- LOGGING ---
-        function renderLog() {
-            if(!APP.active && APP.program.length > 0) {
-                APP.active = { name: APP.program[0].name, ex: JSON.parse(JSON.stringify(APP.program[0].ex)), completed: {}, start: Date.now() };
-                save();
+            } catch (e) {
+                document.getElementById('setup-err').innerHTML = `<div class="err-msg">${e.message}</div>`;
             }
-            if(!APP.active) return;
-            document.getElementById('log-day-title').innerText = APP.active.name;
-            document.getElementById('log-mount').innerHTML = APP.active.ex.map((ex, i) => `
+        },
+
+        async aiTalk(msg) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${APP.data.key}`;
+            const prompt = `System: You are the AI Strength Trainer. Context: ${JSON.stringify(APP.data.profile)}`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt + " Trainee: " + msg }] }] })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error ? err.error.message : "Handshake Failed");
+            }
+
+            const data = await response.json();
+            const raw = data.candidates[0].content.parts[0].text;
+            return {
+                text: raw.split('COMMAND:')[0],
+                cmd: raw.includes('COMMAND:') ? JSON.parse(raw.split('COMMAND:')[1].trim()) : null
+            };
+        },
+
+        tab(t, el) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('v-' + t).classList.add('active');
+            el.classList.add('active');
+            if(t === 'prog') this.renderProg();
+        },
+
+        renderLog() {
+            if(!APP.data.program.length) return;
+            const day = APP.data.program[0];
+            document.getElementById('day-title').innerText = day.name;
+            document.getElementById('log-mount').innerHTML = day.ex.map((ex, i) => `
                 <div class="card">
-                    <div class="ex-header" onclick="this.nextElementSibling.classList.toggle('open')">
-                        <div style="font-family:var(--serif); font-size:18px;">${ex.name}</div>
-                        <div class="num" style="opacity:0.5; font-size:12px;">${ex.s}x${ex.r} @ ${ex.w}kg</div>
-                    </div>
+                    <div style="font-family:var(--serif); font-size:18px;">${ex.name}</div>
+                    <div class="num" style="font-size:12px; opacity:0.5">${ex.s}x${ex.r} @ ${ex.w}kg</div>
                     <div class="ex-content">
-                        <div style="display:flex; gap:10px; margin-bottom:15px">
-                            <div class="stepper"><div onclick="adj(${i},'w',-2.5)" style="padding:10px">-</div><div class="num">${ex.w}kg</div><div onclick="adj(${i},'w',2.5)" style="padding:10px">+</div></div>
-                            <div class="stepper"><div onclick="adj(${i},'r',-1)" style="padding:10px">-</div><div class="num">${ex.r}r</div><div onclick="adj(${i},'r',1)" style="padding:10px">+</div></div>
-                        </div>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap">
-                            ${Array(parseInt(ex.s)).fill(0).map((_, s) => `
-                                <div class="set-node ${APP.active.completed[i+'-'+s]?'done':''}" onclick="markSet(${i},${s},${ex.rest||90})">${s+1}</div>
-                            `).join('')}
-                        </div>
+                        ${Array(parseInt(ex.s)).fill(0).map((_, s) => `<div class="set-node">${s+1}</div>`).join('')}
                     </div>
                 </div>
             `).join('');
-        }
+        },
 
-        function adj(i,k,v) { APP.active.ex[i][k]+=v; save(); renderLog(); }
-        function markSet(i,s,r) { 
-            const id=i+'-'+s; APP.active.completed[id]=!APP.active.completed[id]; 
-            if(APP.active.completed[id]) startRest(r); save(); renderLog(); 
-        }
-        function startRest(s) { document.getElementById('timer-ov').style.display='flex'; let l=s; clearInterval(APP.timer); APP.timer=setInterval(()=>{l--;document.getElementById('t-val').innerText=l;if(l<=0)stopT();},1000); }
-        function stopT() { clearInterval(APP.timer); document.getElementById('timer-ov').style.display='none'; }
-        
-        async function completeWorkout() {
-            APP.settings.history.push({...APP.active, end: Date.now()});
-            APP.active = null; save(); location.reload();
-        }
-
-        // --- TABS & STORAGE ---
-        function tab(t, el) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('v-'+t).classList.add('active');
-            el.classList.add('active');
-            if(t==='prog') renderProg();
-            if(t==='set') renderSet();
-        }
-
-        function renderProg() { 
-            document.getElementById('prog-mount').innerHTML = APP.program.map(d => `
-                <div class="card"><div style="font-family:var(--serif); font-size:18px; color:var(--moss)">${d.name}</div>
-                ${d.ex.map(e => `<div style="display:flex; justify-content:space-between; font-size:13px; padding:5px 0;"><span>${e.name}</span><span class="num">${e.s}x${e.r} @ ${e.w}kg</span></div>`).join('')}</div>
+        renderProg() {
+            document.getElementById('prog-mount').innerHTML = APP.data.program.map(d => `
+                <div class="card">
+                    <div style="font-family:var(--serif); font-size:18px; color:var(--moss)">${d.name}</div>
+                    ${d.ex.map(e => `<div style="display:flex; justify-content:space-between; padding:5px 0; font-size:13px; border-bottom:1px solid #f0f0f0"><span>${e.name}</span><span class="num">${e.s}x${e.r} @ ${e.w}kg</span></div>`).join('')}
+                </div>
             `).join('');
-        }
+        },
 
-        function renderSet() {
-            document.getElementById('settings-mount').innerHTML = `<div class="card"><label>Profile JSON</label><textarea style="height:150px">${JSON.stringify(APP.settings.profile,null,2)}</textarea><button class="btn" style="background:var(--clay)" onclick="localStorage.clear(); location.reload();">Reset All Data</button></div>`;
+        finish() {
+            alert("Session recorded. This would normally sync to history.");
+            location.reload();
         }
+    };
 
-        async function sendChat() {
-            const inp = document.getElementById('chat-in');
-            const m = inp.value; if(!m) return;
-            const mount = document.getElementById('chat-mount');
-            mount.innerHTML += `<div style="text-align:right; font-size:11px; opacity:0.5; margin:10px 0;">> ${m}</div>`;
-            inp.value
+    // --- BOOT ---
+    window.addEventListener('DOMContentLoaded', () => {
+        if(APP.data.key && APP.data.program.length > 0) {
+            document.getElementById('v-setup').classList.remove('active');
+            document.getElementById('v-log').classList.add('active');
+            document.getElementById('nav-bar').classList.add('visible');
+            UI.renderLog();
+        }
+        lucide.createIcons();
+    });
+    </script>
+</body>
+</html>
